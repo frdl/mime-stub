@@ -3,6 +3,7 @@
 # [webfan\MimeStubAPC](https://github.com/frdl/mime-stub/tree/master/src/webfan)
 
 * Dowload an example implementation at http://www.webfan.de/install/
+* [Example](https://github.com/frdl/mime-stub/blob/master/tests/test.mime-stub.php)
  
 ```php
 <?php 
