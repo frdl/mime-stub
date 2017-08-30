@@ -1,5 +1,44 @@
 # README
 
+# webfan\MimeStubAPC
+
+* Dowload an example implementation at http://www.webfan.de/install/
+ 
+```php
+<?php 
+
+   $vm = \webfan\MimeStubAPC::vm();
+ 
+ // echo print_r($vm, true);
+ 
+ $newFile = __DIR__. DIRECTORY_SEPARATOR . 'TestMimeStubAPC.php';
+ 
+ 
+ $a = <<<PHPE
+ 
+ echo ' TEST-modified.';
+ 
+ PHPE;
+ 
+ 
+ $stub = $vm->get_file($vm->document, '$HOME/index.php', 'stub index.php')
+ // ->clear()
+   ->append($a)
+ ;
+ 
+  $vm->to('hello@wor.ld');
+  $vm->from('me@localhost');
+  $stub->from('hello@wor.ld');  
+     
+  $vm->location = $newFile;
+ require $newFile;
+ $run($newFile);
+
+```
+
+
+# [Riverline\MultiPartParser](https://travis-ci.org/Riverline/multipart-parser)
+
 [![Build Status](https://travis-ci.org/Riverline/multipart-parser.svg?branch=master)](https://travis-ci.org/Riverline/multipart-parser)
 
 ## What is Riverline\MultiPartParser
