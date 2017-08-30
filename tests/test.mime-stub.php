@@ -29,6 +29,29 @@ $attachPart = $vm->get_file($vm->document, '$__FILE__/attach.zip', 'archive atta
 $attachPart->append($fcont);  //  test-my-install-index.php?web=/images/apc.ico
 
 
+
+ 	
+ $fcont = <<<PHP
+Content-Type: application/x-httpd-php;charset=utf-8
+Content-Disposition: httpd ;filename="\$HOME/\$WEBtest.php";name="\$WEB test.php"
+
+
+
+
+<?php
+\$test = new \webfan\InstallShield\apc\Test();
+\$test->run();
+
+PHP;
+ 
+
+$attachPart->append($fcont);	//  test-my-install-index.php?web=test.php
+
+ 	
+ 	
+
+
+
 $vm->location = $newFile; // this saves the stub-php-file to $newFile 
 
 //Test the new stub and call/run the $newFile, should be like calling the file in the browser!
