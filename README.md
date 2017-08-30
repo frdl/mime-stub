@@ -1,6 +1,6 @@
 # README
 
-# webfan\MimeStubAPC
+# [webfan\MimeStubAPC](https://github.com/frdl/mime-stub/tree/master/src/webfan)
 
 * Dowload an example implementation at http://www.webfan.de/install/
  
