@@ -927,7 +927,7 @@ class Response
 
 
   public function getAllHeaders(){
-       $headers = '';
+       $headers = [];
        foreach ($_SERVER as $name => $value)
        {
            if (substr($name, 0, 5) == 'HTTP_')
