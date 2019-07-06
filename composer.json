@@ -44,7 +44,8 @@
     },
     
     "psr-4": {
-            "webfan\\Mime\\": "src/webfan/Mime/"   
+            "webfan\\Mime\\": "src/webfan/Mime/",
+            "webfan\\hps\\Compile\\": "src/webfan/hps/Compile/" 
      },
        
      "classmap": ["src/webfan/MimeStub.php", "src/webfan/Mime/vm.php", "src/webfan/MimeStubAPC.php"]
