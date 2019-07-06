@@ -566,7 +566,28 @@ class Response
        }		
 	 }
 
+  public function addPhpStub($code, $file = null){
+	  
+		
+	$archive = $this->get_file($this->document, '$__FILE__/stub.zip', 'archive stub.zip');
 
+	  
+	if(null === $file){
+		$file = '$STUB/index-'.count($archive->getParts()).'.php';
+	}
+				   
+    $archive->addFile('application/x-httpd-php', 'php', $code, $file/* = '$__FILE__/filename.ext' */, 'stub stub.php');
+	return $this;
+  }
+
+	
+  public function setIndexPhp($code){
+	throw new \Exception('Extend/alter the class `'.get_class($this).'` to allow the rewriting of the index.php');
+	$indexFile = $this->get_file($this->document, '$HOME/index.php', 'stub index.php');
+	$indexFile->clear();
+    $indexFile->setBody($code);
+	return $this;
+  }
 
     public function get_file($part, $file, $name){
     	
@@ -719,7 +740,7 @@ class Response
 	     $newNamespace = "App\compiled\Instance\MimeStub\MimeStubEntity".mt_rand(1000000,999999999);
 	   
 	 
-	   
+	   /*
     	    $php = preg_replace("/(".preg_quote('namespace webfan\hps\Compile;').")/", 
 								'namespace '.\webfan\hps\Module::MODULE_NAMESPACE_FROM.';',
 								  $php);
@@ -739,7 +760,14 @@ class Response
   $Compiler->setReplaceNamespace(\webfan\hps\Module::MODULE_NAMESPACE_FROM,$newNamespace);							  
   $Compiler->code($php);
   $php = $Compiler->compile();
-	  
+	  */
+	   
+    	    $php = preg_replace("/(".preg_quote('namespace '.__NAMESPACE__.';').")/", 
+								'namespace '.$newNamespace.';',
+								  $php);	   
+	   
+	   
+	   
 	   
 				 $php = $php.$mime;				  
 
@@ -1979,25 +2007,7 @@ $codeWrap.= \PHP_EOL.\PHP_EOL. trim($code);
 } 	
 	
 				   
-public function addPhpStub($code, $file = null){
-	$archive = $this->get_file($this->document, '$__FILE__/stub.zip', 'archive stub.zip');
-				   
-	if(null === $file){
-		$file = '$STUB/index-'.count($archive->getParts()).'.php';
-	}
-				   
-    $archive->addFile('application/x-httpd-php', 'php', $code, $file/* = '$__FILE__/filename.ext' */, 'stub stub.php');
-	return $this;
-}
 
-	
-public function setIndexPhp($code){
-	throw new \Exception('Extend/alter the class `'.get_class($this).'` to allow the rewriting of the index.php');
-	$indexFile = $vm->get_file($vm->document, '$HOME/index.php', 'stub index.php');
-	$indexFile->clear();
-    $indexFile->setBody($code);
-	return $this;
-}
 
 }
 
@@ -2050,19 +2060,24 @@ spl_autoload_register(array($this,'Autoload'), true, true);
 
 
 
+
+
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.php"
 
-
 <?php
 
+	
+	
+	
+	
+	
 
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
-
-
+	
 <?php
 if(isset($_GET['web'])){
 	$_SERVER['REQUEST_URI'] = ltrim($_GET['web'], '/ ');
@@ -2092,12 +2107,13 @@ if(false !==$webfile){
 }
 
 
+
+
+
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
-
-
-
+	
 <?php
 
  call_user_func_array([$this, '_run_php_1'], [$this->get_file($this->document, '$STUB/bootstrap.php', 'stub bootstrap.php') ]);
@@ -2116,11 +2132,14 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 
 
+
+
+
 --4444EVGuDPPT--
 --3333EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$DIR_PSR4/O.php";name="class O"
-
+	
 <?php
  /**
  * Compression Shortcut
