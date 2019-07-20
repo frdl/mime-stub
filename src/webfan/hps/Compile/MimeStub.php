@@ -1,7 +1,4 @@
 <?php
-namespace webfan\hps\Compile;
-use frdl;
-define('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___', true);
 /**
  * @package frdl/webfan
  * @version 1.2.x
@@ -109,8 +106,9 @@ Author URI: http://frdl.webfan.de
 * 
 *  - edited by webfan.de
 */
-
-
+namespace webfan\hps\Compile;
+use frdl;
+define('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___', true);
 
 
 function apc_wp_plugin_include_php($file){
@@ -453,9 +451,9 @@ register_shutdown_function(function ($dir, $php, $bf) {
 */
  $run = function($file = null){
  	$args = func_get_args();
- //	if (!headers_sent()){
- 	//  header_remove();
- 	//}
+ 	if (!headers_sent()){
+ 	  header_remove();
+ 	}
  	$MimeVM = new MimeVM($args[0]);
  	$MimeVM('run');
  	return $MimeVM;
@@ -552,42 +550,21 @@ class Response
 
   	protected function runStubs(){
 
-	  foreach( $this->get_file($this->document, '$__FILE__/stub.zip', 'archive stub.zip')->getParts() as $rootPos => $rootPart){
+	  foreach( $this->document->getParts() as $rootPos => $rootPart){
           if($rootPart->isMultiPart())	{
 		 	foreach( $rootPart->getParts() as $pos => $part){
 		 		if(isset($this->mimes_engine[$part->getMimeType()])){
 					call_user_func_array(array($this, $this->mimes_engine[$part->getMimeType()]), array($part));
 				}
     	    }
-		  }elseif(isset($this->mimes_engine[$rootPart->getMimeType()])){
-		  	call_user_func_array(array($this, $this->mimes_engine[$rootPart->getMimeType()]), array($rootPart));
 		  }
-		 
-       }		
+		  break;
+       }
+		
+		
 	 }
 
-  public function addPhpStub($code, $file = null){
-	  
-		
-	$archive = $this->get_file($this->document, '$__FILE__/stub.zip', 'archive stub.zip');
 
-	  
-	if(null === $file){
-		$file = '$STUB/index-'.count($archive->getParts()).'.php';
-	}
-				   
-    $archive->addFile('application/x-httpd-php', 'php', $code, $file/* = '$__FILE__/filename.ext' */, 'stub stub.php');
-	return $this;
-  }
-
-	
-  public function setIndexPhp($code){
-	throw new \Exception('Extend/alter the class `'.get_class($this).'` to allow the rewriting of the index.php');
-	$indexFile = $this->get_file($this->document, '$HOME/index.php', 'stub index.php');
-	$indexFile->clear();
-    $indexFile->setBody($code);
-	return $this;
-  }
 
     public function get_file($part, $file, $name){
     	
@@ -635,7 +612,7 @@ class Response
 		try{
 			eval($code);
 		}catch(\Exception $e){
-			trigger_error('Issue in {$MimeStub}/'.$part->getFileName().' '.$part->getName().' : '.$e->getMessage(), $e->getSeverity());
+			trigger_error('Issue in {$MimeStubAPC}/'.$part->getFileName().' '.$part->getName().' : '.$e->getMessage(), $e->getSeverity());
 		}
 		
 	}
@@ -689,10 +666,6 @@ class Response
    public function __set($name, $value)
     {
     	if('location'===$name){
-			if(basename($value) === 'MimeStub.php' || basename($value) === basename(__CLASS__).'.php'  || basename($value) === basename(get_class($this)).'.php' ){
-				throw new \Exception('Do not overwrite the original class file '.str_replace($_SERVER['DOCUMENT_ROOT'], '', __FILE__));
-			}
-			
     		$code =$this->__toString();
 			file_put_contents($value, $code);
 			return null;
@@ -715,10 +688,7 @@ class Response
 	    return __COMPILER_HALT_OFFSET__;
     } 
     
-   
-	//INHERIT_DEFAULTS; 
-	 
-	 
+    
    public function __toString()
    {
  	 	  // 	$document = $this->document;	
@@ -741,7 +711,7 @@ class Response
 	   
 	 
 	   /*
-    	    $php = preg_replace("/(".preg_quote('namespace webfan\hps\Compile;').")/", 
+    	    $php = preg_replace("/(".preg_quote('namespace App\compiled\Instance\MimeStub\MimeStubEntity218187677;').")/", 
 								'namespace '.\webfan\hps\Module::MODULE_NAMESPACE_FROM.';',
 								  $php);
 	   
@@ -761,18 +731,17 @@ class Response
   $Compiler->code($php);
   $php = $Compiler->compile();
 	  */
-	   
     	    $php = preg_replace("/(".preg_quote('namespace '.__NAMESPACE__.';').")/", 
 								'namespace '.$newNamespace.';',
 								  $php);	   
-	   
-	   
+
 	   
 	   
 				 $php = $php.$mime;				  
 
 	 	return $php;
    }   
+      
      
   public function __get($name)
     {
@@ -986,12 +955,12 @@ class Response
 
 
   public function getAllHeaders(){
-       $headers = '';
+       $headers = [];
        foreach ($_SERVER as $name => $value)
        {
            if (substr($name, 0, 5) == 'HTTP_')
            {
-               $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+               $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5, strlen($name))))))] = $value;
            }
        }
        return $headers;
@@ -1392,7 +1361,7 @@ public function generateBundary($opts = array()) {
     
     
  
-   public static function strip_body($s,$s1,$s2=false,$offset=0, $_trim = false) {
+   public static function strip_body($s,$s1,$s2=false,$offset=0, $_trim = true) {
     /*
     * http://php.net/manual/en/function.strpos.php#75146
     */
@@ -1425,7 +1394,7 @@ public function generateBundary($opts = array()) {
 				}
 
                 if( !array_key_exists($this_key,$result) ) {
-                    $result[$this_key] = [];
+                    $result[$this_key] = array();
                 }
 
                 $result[$this_key][] = $pos1;
@@ -1453,13 +1422,13 @@ public function generateBundary($opts = array()) {
      * @param string $content
      * @throws \InvalidArgumentException
      */
-    public function __construct($content, &$parent = null)
+    protected function __construct($content, &$parent = null)
     {
     	$this->_id = ++self::$__i;
     	$this->_parent = $parent;
     	
         // Split headers and body
-        $splits = preg_split('/([\r\n]{2,})/', $content, 2);
+        $splits = preg_split('/(\r?\n){2}/', $content, 2);
 
         if (count($splits) < 2) {
             throw new \InvalidArgumentException("Content is not valid, can't split headers and content");
@@ -1470,7 +1439,7 @@ public function generateBundary($opts = array()) {
         // Regroup multiline headers
         $currentHeader = '';
         $headerLines = array();
-        foreach (preg_split('/[\r\n]/', $headers) as $line) {
+        foreach (preg_split('/\r?\n/', $headers) as $line) {
             if (empty($line)) {
                 continue;
             }
@@ -1529,8 +1498,8 @@ public function generateBundary($opts = array()) {
 
             $separator = '--'.preg_quote($boundary, '/');
 
-            if (0 === preg_match('/'.$separator.'[\r\n](.+?)[\r\n]'.$separator.'--/', $body, $matches)
-              || preg_last_error() !== \PREG_NO_ERROR
+            if (0 === preg_match('/'.$separator.'\r?\n(.+?)\r?\n'.$separator.'--/s', $body, $matches)
+              || preg_last_error() !== PREG_NO_ERROR
             ) {
               $bodyParts = self::strip_body($body,$separator."",$separator."--",0);
                if(1 !== count($bodyParts['pindex'])){
@@ -1545,7 +1514,7 @@ public function generateBundary($opts = array()) {
 
             
 
-            $parts = preg_split('/([\r\n]'.$separator.'[\r\n])/', $bodyStr);
+            $parts = preg_split('/\r?\n'.$separator.'\r?\n/', $bodyStr);
             unset($bodyStr);
 
             foreach ($parts as $part) {
@@ -1666,12 +1635,7 @@ public function generateBundary($opts = array()) {
         if(true === $generate && $this->isMultiPart() 
            && (!is_string($this->boundary) || 0===strlen(trim($this->boundary))) 
         ){
-        	$this->setBoundary([
-				'length' =>  max(min(8, strlen($this->body)), 32),
-                'numeric' => true,
-                'letters' => true,
-                'special' => false
-			]);
+        	$this->setBoundary();
 		}
         return $this->boundary;
     }   
@@ -1742,22 +1706,18 @@ public function generateBundary($opts = array()) {
      * @return string
      * @throws \LogicException if is multipart
      */
-    public function getBody($reEncode = true, &$encoding = null)
+    public function getBody($reEncode = false, &$encoding = null)
     {
         if ($this->isMultiPart()) {
             throw new \LogicException("MultiPart content, there aren't body");
         } else {
 	    	$body = $this->body;
 	    	
-			if(true === \webfan\hps\Format\Validate::isbase64($body) ){
-				  $this->setHeaderOption('Content-Transfer-Encoding', 'base64', null);
-			}
-
 	     if(true===$reEncode){
             $encoding = $this->getEcoding();
             switch ($encoding) {
                 case 'base64':
-                    $body = (!\webfan\hps\Format\Validate::isbase64($body)) ? $this->urlsafeB64Encode($body) : $body;
+                    $body = $this->urlsafeB64Encode($body);
                     break;
                 case 'quoted-printable':
                     $body = quoted_printable_encode($body);
@@ -1942,10 +1902,14 @@ public function generateBundary($opts = array()) {
 
         return $parts;
     }
-	
-
-	 
-	public function addFile($type = 'application/x-httpd-php', $disposition = 'php', $code, $file/* = '$__FILE__/filename.ext' */, $name/* = 'stub stub.php'*/){
+    
+    
+    
+    
+    
+    
+    
+    	public function addFile($type = 'application/x-httpd-php', $disposition = 'php', $code, $file/* = '$__FILE__/filename.ext' */, $name/* = 'stub stub.php'*/){
 	 
 		
        //   if(null===$parent){
@@ -1992,13 +1956,29 @@ if(null === $boundary){
 
 $codeWrap ='';
 	
-$codeWrap.= 'Content-Disposition: '.$disposition.'; filename="'.$file.'" ; name="'.$name.'"'.\PHP_EOL	;	
+
 				   
-if(is_string($type)){
-$codeWrap.= 'Content-Type: '.$type.\PHP_EOL	;
+if(is_string($type)){	
+$codeWrap.= <<<HEADER
+Content-Disposition: "$disposition" ; filename="$file" ; name="$name"
+Content-Type: $type
+HEADER;
+}else{
+ $codeWrap.= "Content-Disposition: ".$disposition." ; filename=\"".$file."\" ; name=\"".$name."\"";	
 }
 
-$codeWrap.= \PHP_EOL.\PHP_EOL. trim($code);	
+	
+if('application/x-httpd-php' === $type || 'application/vnd.frdl.script.php' === $type){
+  $code = trim($code);
+  if('<?php' === substr($code, 0, strlen('<?php')) ){
+	  $code = substr($code, strlen('<?php'), strlen($code));
+  }
+  $code = rtrim($code, '<?php ');
+  $code = '<?php '.$code.' ?>';	
+}
+					 
+					 
+$codeWrap.= "\r\n"."\r\n". trim($code);	
 	
 //$codeWrap.=\PHP_EOL. $code. \PHP_EOL. \PHP_EOL.'--'.$boundary.'--';
 //$codeWrap.= \PHP_EOL;	
@@ -2006,10 +1986,9 @@ $codeWrap.= \PHP_EOL.\PHP_EOL. trim($code);
  return $codeWrap;
 } 	
 	
-				   
-
-
 }
+
+
 
 
 
@@ -2022,23 +2001,21 @@ From: script@example.com
 Content-Type: multipart/alternate;boundary=EVGuDPPT
 
 --EVGuDPPT
-Content-Type: text/plain;charset=utf-8	
-
-*InstallShield*
-	
---EVGuDPPT
 Content-Type: text/html;charset=utf-8
-	
+
 <h1>InstallShield</h1>
 <p>Your Installer you downloaded at <a href="http://www.webfan.de/install/">Webfan</a> is attatched in this message.</p>
 <p>You may have to run it in your APC-Environment.</p>
 
---EVGuDPPT--	
---hoHoBundary12344dh
-Content-Type: multipart/related;boundary=3333EVGuDPPT
-Content-Disposition: php ;filename="$__FILE__/attach.zip";name="archive attach.zip"
 
---3333EVGuDPPT
+--EVGuDPPT
+Content-Type: text/plain;charset=utf-8
+
+ -InstallShield-
+Your Installer you downloaded at http://www.webfan.de/install/ is attatched in this message.
+You may have to run it in your APC-Environment.
+
+--EVGuDPPT
 Content-Type: multipart/related;boundary=4444EVGuDPPT
 Content-Disposition: php ;filename="$__FILE__/stub.zip";name="archive stub.zip"
 
@@ -2051,6 +2028,63 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 spl_autoload_register(array($this,'Autoload'), true, true);
 
 
+
+
+
+
+      //\frdl\webfan\Autoloading\SourceLoader::top() -> unregister(array(frdl\webfan\Autoloading\SourceLoader::top(),'autoloadClassFromServer'));
+
+
+
+spl_autoload_register(function($class){
+	$salt = mt_rand(10000000,99999999);
+	$url =	'https://webfan.de/install/?salt='.$salt.'&source='. urlencode( str_replace('\\\\', '/', $class) . '.php');
+	$code = file_get_contents($url);
+	foreach($http_response_header as $i => $header){
+		$h = explode(':', $header);
+		if('x-content-hash' === strtolower(trim($h[0]))){
+			$hash = trim($h[1]);
+		}		
+		if('x-user-hash' === strtolower(trim($h[0]))){
+			$userHash = trim($h[1]);
+		}		
+	}
+
+	
+
+
+	if(false !==$code){		
+	
+	$oCode =$code;
+	
+	//echo \$hash . '<br />'. \$userHash;
+	$hash_check = strlen($oCode).'.'.sha1($oCode);
+	$userHash_check = sha1($salt .$hash_check);	
+	
+	if($hash_check !== $hash || $userHash_check !== $userHash){
+		throw new \Exception('Invalid checksums while fetching source code from '.$url);
+	}
+	
+	$code =ltrim($code, '<?php');
+	$code =rtrim($code, '?php>');	
+	
+	  try{
+	  	eval($code);	
+	  	return true;
+	  }catch(\Exception $e){
+	  	 print_r($e->getMessage());
+	  }
+		 	
+	}
+	
+	
+}, true, false);
+
+
+
+
+
+
 \frdl\webfan\Autoloading\SourceLoader::repository('frdl'); 
 
 \frdl\webfan\App::God(true, 'frdl\webfan\Autoloading\Autoloader','AC boot') 
@@ -2060,86 +2094,64 @@ spl_autoload_register(array($this,'Autoload'), true, true);
 
 
 
-
-
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.php"
 
+
 <?php
 
-	
-	
-	
-	
-	
 
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
-	
+
+
+
 <?php
-if(isset($_GET['web'])){
-	$_SERVER['REQUEST_URI'] = ltrim($_GET['web'], '/ ');
-}
-
-$p = explode('?', $_SERVER['REQUEST_URI']);
-$path = $p[0];
-
-$webfile= $this->get_file($this->document, '$HOME/$WEB'.$path, 'stub '.$path) ;
-if(false !==$webfile){
-	$p2 = explode('.', $path);
-	$p2 = array_reverse($p2);	
-	$p3 = explode(';', $webfile->getHeader('Content-Type'));
-	
-	if('php' === strtolower($p2[0]) || 'application/x-httpd-php'===$p3[0] ){		
-
-		call_user_func_array([$this, '_run_php_1'], [$webfile]);
-	}else{
-	   ob_end_clean();
-	   header('Content-Type: '.$webfile->getMimeType());		
-	   echo $webfile->getBody();
-	}
-	
-
-	
-	die();
-}
-
-
-
 
 
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
-	
+
+
+
 <?php
 
- call_user_func_array([$this, '_run_php_1'], [$this->get_file($this->document, '$STUB/bootstrap.php', 'stub bootstrap.php') ]);
- 
- 
- //\\frdl\\webfan\\Autoloading\\SourceLoader::top()-> unregister(array(\\frdl\\webfan\\Autoloading\\SourceLoader::top(),'autoloadClassFromServer')) ;
- 
- 
-  
- 
- call_user_func_array([$this, '_run_php_1'], [$this->get_file(\$this->document, '$HOME/apc_config.php', 'stub apc_config.php') ]);
- call_user_func_array([$this, '_run_php_1'], [$this->get_file(\$this->document, '$HOME/detect.php', 'stub detect.php') ]);
+echo 'Hello World!';
+
+echo '<br /><br />Test: ';
+try{
+ $o = new \O;	
+}catch(\Exception $e){
+	$o = new \stdclass;
+}
+
+if('O'===get_class($o)){
+	echo 'OK';
+}else{
+	echo ' ERROR';
+}	
+$test = new \Test\Testing();
+echo print_r(get_class($test), true);
+echo print_r($test, true);
+echo "Hoi";
+echo '<br />'.$this->getHeader('Content-Type');
 
 
- call_user_func_array([$this, 'runStubs'], []);
 
-
-
-
-
-
+?>
 --4444EVGuDPPT--
+--EVGuDPPT--
+--hoHoBundary12344dh
+Content-Type: multipart/related;boundary=3333EVGuDPPT
+Content-Disposition: php ;filename="$__FILE__/attach.zip";name="archive attach.zip"
+
 --3333EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$DIR_PSR4/O.php";name="class O"
-	
+
 <?php
  /**
  * Compression Shortcut
@@ -4166,7 +4178,7 @@ class SourceLoader extends Loader
 		 */
         if(class_exists('\webdof\wHTTP') && class_exists('\webdof\Http\Client') && class_exists('\webdof\Webfan\APIClient')){ 
 	      $this->Client = new \webdof\Webfan\APIClient();
-		  $this->Client->prepare( 'http',
+		  $this->Client->prepare( 'https',
                           'interface.api.webfan.de',
                           'GET',
                           self::$id_interface,  //  i1234 
@@ -4195,7 +4207,8 @@ class SourceLoader extends Loader
 			return false;
 		 }  	
 	   }else{
-	      $url = 'http://interface.api.webfan.de/v1/'.self::$id_interface.'/software/class/'.self::$id_repositroy.'/'.implode(".",array_reverse($c)).'/source.php';
+	      $url = 'https://interface.api.webfan.de/v1/'.self::$id_interface.'/software/class/'.self::$id_repositroy.'/'.implode(".",array_reverse($c)).'/source.php';
+	     // die($url);
 		  $data = file_get_contents($url);
 		  if(false === $data){
 		  	 return false;			  
@@ -4203,6 +4216,8 @@ class SourceLoader extends Loader
 		  	 $this->data = $data;
 		  }
 	   }
+				
+				
 				  
 	    return true;					  
     }
